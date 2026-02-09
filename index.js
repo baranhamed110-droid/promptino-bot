@@ -8,7 +8,7 @@ app.use(express.json());
 
 const TOKEN = process.env.TELEGRAM_TOKEN;
 const OPENAI_KEY = process.env.OPENAI_KEY;
-const TELEGRAM_API = https://api.telegram.org/bot${TOKEN};
+const TELEGRAM_API = 'https://api.telegram.org/bot${TOKEN}';
 
 // دریافت پیام از تلگرام
 app.post("/webhook", async (req, res) => {
@@ -30,14 +30,14 @@ app.post("/webhook", async (req, res) => {
       },
       {
         headers: {
-          Authorization: Bearer ${OPENAI_KEY},
+          Authorization: 'Bearer ${OPENAI_KEY}',
         },
       }
     );
 
     const botReply = aiResponse.data.choices[0].message.content;
 
-    await axios.post(${TELEGRAM_API}/sendMessage, {
+    await axios.post('${TELEGRAM_API}/sendMessage', {
       chat_id: chatId,
       text: botReply,
     });
@@ -48,6 +48,7 @@ app.post("/webhook", async (req, res) => {
   res.sendStatus(200);
 });
 
+// پورت Render
 app.listen(10000, () => {
   console.log("Bot is running...");
 });
