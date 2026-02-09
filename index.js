@@ -1,55 +1,53 @@
-const TelegramBot = require("node-telegram-bot-api");
-const axios = require("axios");
-require("dotenv").config();
+import express from "express";
+import axios from "axios";
+import dotenv from "dotenv";
+dotenv.config();
 
-const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
+const app = express();
+app.use(express.json());
 
-bot.on("message", async (msg) => {
-  const chatId = msg.chat.id;
-  const prompt = msg.text;
+const TOKEN = process.env.TELEGRAM_TOKEN;
+const OPENAI_KEY = process.env.OPENAI_KEY;
+const TELEGRAM_API = https://api.telegram.org/bot${TOKEN};
+
+// دریافت پیام از تلگرام
+app.post("/webhook", async (req, res) => {
+  const message = req.body.message;
+
+  if (!message || !message.text) {
+    return res.sendStatus(200);
+  }
+
+  const chatId = message.chat.id;
+  const userText = message.text;
 
   try {
-    if (prompt.startsWith("عکس")) {
-      const cleanPrompt = prompt.replace("عکس", "").trim();
-
-      const image = await axios.post(
-        "https://api.openai.com/v1/images/generations",
-        {
-          model: "gpt-image-1",
-          prompt: cleanPrompt
-        },
-        {
-          headers: {
-           Authorization: "Bearer" + process.env.OPENAI_KEY,
-            "Content-Type": "application/json"
-          }
-        }
-      );
-
-      const url = image.data.data[0].url;
-      bot.sendPhoto(chatId, url);
-      return;
-    }
-
-    const response = await axios.post(
+    const aiResponse = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
         model: "gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }]
+        messages: [{ role: "user", content: userText }],
       },
       {
         headers: {
-          Authorization: "Bearer" + process.env.OPENAI_KEY,
-          "Content-Type": "application/json"
-        }
+          Authorization: Bearer ${OPENAI_KEY},
+        },
       }
     );
 
-    const text = response.data.choices[0].message.content;
-    bot.sendMessage(chatId, text);
+    const botReply = aiResponse.data.choices[0].message.content;
 
+    await axios.post(${TELEGRAM_API}/sendMessage, {
+      chat_id: chatId,
+      text: botReply,
+    });
   } catch (err) {
-    console.log(err);
-    bot.sendMessage(chatId, "یه مشکلی پیش اومد، دوباره امتحان کن.");
+    console.error(err);
   }
+
+  res.sendStatus(200);
+});
+
+app.listen(10000, () => {
+  console.log("Bot is running...");
 });
